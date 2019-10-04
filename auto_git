@@ -1,0 +1,26 @@
+#!/bin/bash
+
+LOG=/home/superadmin/project/sync_git/logs/log_$1.txt
+USER_NAME="Rybin-AV"
+CONTRIBUTOR="asmeron"
+
+echo "Commit $1 $(date +'%H:%M %d.%m.%Y') " > $LOG
+echo "***********************************" >> $LOG
+
+echo "Enter the Password:"
+read -s PASS
+
+git add .
+git status >> $LOG
+git commit -m "$1" >> $LOG
+
+/usr/bin/expect<<EOF
+    spawn git push
+    expect "Username*"
+    send "$USER_NAME\n"
+    expect "Password*"
+    send "$PASS\n"
+    expect eof
+EOF
+
+hub pull-request --base ${CONTRIBUTOR}:master --head ${USER_NAME}:master -m "$1" >> $LOG
